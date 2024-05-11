@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ToDoListAppication</string>
+    <string name="alertTitle">Enter new ToDo Item:</string>
 </resources>
