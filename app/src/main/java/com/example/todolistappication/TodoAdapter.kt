@@ -15,11 +15,12 @@ class TodoAdapter {
         }
 
         override fun getItemCount(): Int {
-            TODO("Not yet implemented")
+           return 1
         }
 
         override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
-            TODO("Not yet implemented")
+
+            holder.cbTodo.text="Sample Text"
         }
 
     }
