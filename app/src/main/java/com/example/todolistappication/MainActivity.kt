@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,6 +24,10 @@ class MainActivity : AppCompatActivity() {
        }
 
         button.setOnClickListener{
+
+            runBlocking {
+                delay(3000)
+            }
             Toast.makeText(this,"This a button click",Toast.LENGTH_LONG).show()
         }
     }
