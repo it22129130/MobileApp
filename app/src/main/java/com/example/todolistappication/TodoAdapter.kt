@@ -20,6 +20,7 @@ class TodoAdapter(
     private val viewModel: MainActivityData
 ) : RecyclerView.Adapter<TodoViewHolder>() {
 
+
     private var context: Context? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoViewHolder {
@@ -104,5 +105,7 @@ class TodoAdapter(
                 Toast.makeText(context, "Select the item to be deleted", Toast.LENGTH_LONG).show()
             }
         }
+
+
     }
 }
