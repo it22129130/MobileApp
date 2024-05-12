@@ -3,8 +3,9 @@ package com.example.todolistappication
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.Toast
-import androidx.lifecycle.ViewModel
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todolistappication.database.Todo
 import com.example.todolistappication.database.TodoRepository
@@ -13,19 +14,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class TodoAdapter(items:List<Todo>,repository: TodoRepository
-,viewModel: MainActivityData) : RecyclerView.Adapter<TodoViewHolder>() {
+class TodoAdapter(
+    private val items: List<Todo>,
+    private val repository: TodoRepository,
+    private val viewModel: MainActivityData
+) : RecyclerView.Adapter<TodoViewHolder>() {
 
-     var context:Context? = null
-    val items=items
-    val repository=repository
-    val viewModel=viewModel
+    private var context: Context? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.view_item, parent, false)
-
-       context=parent.context
-
+        context = parent.context
         return TodoViewHolder(view)
     }
 
@@ -34,22 +33,75 @@ class TodoAdapter(items:List<Todo>,repository: TodoRepository
     }
 
     override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
-        holder.cbTodo.text = items.get(position).item
-        holder.ivDelete.setOnClickListener{
+        val currentItem = items[position]
+        holder.cbTodo.text = currentItem.item
 
-            val isChecked = holder.cbTodo.isChecked
+        holder.cbTodo.setOnLongClickListener {
+            val builder = AlertDialog.Builder(context!!)
+            builder.setTitle("Update Todo Item")
+            val input = EditText(context)
+            input.setText(currentItem.item)
+            builder.setView(input)
 
-            if (isChecked){
+            builder.setPositiveButton("Update") { dialog, which ->
+                val updatedItem = input.text.toString()
                 CoroutineScope(Dispatchers.IO).launch {
-                    repository.delete(items.get(position))
-
+                    repository.update(currentItem.id ?: 0, updatedItem) // Assuming 0 as default value if id is null
                     val data = repository.getAllTodoItems()
-                    withContext(Dispatchers.Main){
+                    withContext(Dispatchers.Main) {
                         viewModel.setData(data)
                     }
                 }
-            }else{
-                Toast.makeText(context,"Select the item to be deleted",Toast.LENGTH_LONG).show()
+            }
+
+            builder.setNegativeButton("Cancel") { dialog, which ->
+                dialog.cancel()
+            }
+
+            builder.show()
+            true // Return true to indicate that the long click event is consumed
+        }
+
+        holder.ivEdit.setOnClickListener {
+            val builder = AlertDialog.Builder(context!!)
+            builder.setTitle("Update Todo Item")
+            val input = EditText(context)
+            input.setText(currentItem.item)
+            builder.setView(input)
+
+            builder.setPositiveButton("Update") { dialog, which ->
+                val updatedItem = input.text.toString()
+                CoroutineScope(Dispatchers.IO).launch {
+                    repository.update(currentItem.id ?: 0, updatedItem) // Assuming 0 as default value if id is null
+                    val data = repository.getAllTodoItems()
+                    withContext(Dispatchers.Main) {
+                        viewModel.setData(data)
+                        Toast.makeText(context, "Update Successful", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+            }
+
+            builder.setNegativeButton("Cancel") { dialog, which ->
+                dialog.cancel()
+            }
+
+            builder.show()
+        }
+
+        holder.ivDelete.setOnClickListener {
+            val isChecked = holder.cbTodo.isChecked
+
+            if (isChecked) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    repository.delete(currentItem)
+                    val data = repository.getAllTodoItems()
+                    withContext(Dispatchers.Main) {
+                        viewModel.setData(data)
+                    }
+                }
+            } else {
+                Toast.makeText(context, "Select the item to be deleted", Toast.LENGTH_LONG).show()
             }
         }
     }
